@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import reactLogo from '@/assets/react.svg';
-import viteLogo from '@/assets/vite.svg';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -16,22 +14,6 @@ function App() {
         minHeight: '100vh',
       }}
     >
-      <div className="flex justify-center items-center space-x-4 mb-8 gap-4">
-        <a href="https://vite.dev" target="_blank">
-          <img
-            src={viteLogo}
-            className="h-16 p-1 transition filter hover:drop-shadow-[0_0_2em_rgba(100,108,255,0.67)]"
-            alt="Vite logo"
-          />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img
-            src={reactLogo}
-            className="h-16 p-1 transition filter hover:drop-shadow-[0_0_2em_rgba(97,218,251,0.67)] animate-spin"
-            alt="React logo"
-          />
-        </a>
-      </div>
       <h1 className="text-3xl font-bold leading-tight">Vite + React</h1>
       <div className="card p-8 my-6 border rounded-lg">
         <button

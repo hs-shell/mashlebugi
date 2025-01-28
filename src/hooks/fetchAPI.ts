@@ -8,6 +8,7 @@ import {
   ParsedSemesterXML,
   Subject,
   Description,
+  CourseEvaluation,
 } from '@/types/types';
 import { extractCollegeName, extractDepartmentName, extractFacultyName } from '@/lib/utils';
 
@@ -259,14 +260,61 @@ export const fetchCourseDescriptionData = ({
         const parser = new xml2js.Parser();
         const result: ParsedXML = await parser.parseStringPromise(xml);
 
-        const item: any = result.root.items[0].item;
+        const item: any = result.root.items[0].item[0];
         const description: Description = {
           code: item?.code,
-          code_values: item?.code_values,
+          code_value: item?.code_value,
           comment: item?.comment,
           ecomment: item?.ecomment,
         };
         setDescription(description);
+      } catch (err) {
+        console.error('XML parsing failed:', err);
+      }
+    } else {
+      console.error('Request failed with status:', xhr.status); // 실패한 응답
+    }
+  };
+
+  xhr.onerror = function () {
+    console.error('Request failed');
+  };
+
+  xhr.send(body);
+};
+
+export const fetchCourseEvaluationData = ({
+  code,
+  setCourseEvaluation,
+}: {
+  code: string;
+  setCourseEvaluation: (courseEvaluation: CourseEvaluation) => void;
+}) => {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://info.hansung.ac.kr/jsp_21/student/kyomu/siganpyo_aui_data.jsp', true);
+  xhr.withCredentials = true;
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  xhr.setRequestHeader('Accept', 'application/xml, text/xml, */*; q=0.01');
+
+  var body = `code=${code}&gubun=pyunga`;
+
+  xhr.onload = async function () {
+    if (xhr.status === 200) {
+      try {
+        const xml = xhr.responseText;
+        const parser = new xml2js.Parser();
+        const result: ParsedXML = await parser.parseStringPromise(xml);
+
+        // const item: any = result.root.items[0].item[0];
+        const courseEvaluation: CourseEvaluation = {
+          academicYear: '2001',
+          courseCode: code,
+          courseName: '크롬익스텐션',
+          professor: '홍길동',
+          score: '4.5',
+          semester: '2학기',
+        };
+        setCourseEvaluation(courseEvaluation);
       } catch (err) {
         console.error('XML parsing failed:', err);
       }

@@ -1,3 +1,4 @@
+// index.tsx 또는 main.tsx
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
@@ -15,6 +16,11 @@ if (body) {
   body.prepend(host);
 
   const shadowRoot = createShadowRoot(host, [styles]);
+
+  // Shadow DOM 내에 모달용 div 추가
+  const modalContainer = document.createElement('div');
+  modalContainer.id = 'shadow-modal-root';
+  shadowRoot.appendChild(modalContainer);
 
   createRoot(shadowRoot).render(
     <ShadowRootContext.Provider value={shadowRoot}>
