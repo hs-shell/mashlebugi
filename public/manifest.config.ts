@@ -2,9 +2,9 @@ import { ManifestV3Export } from '@crxjs/vite-plugin';
 
 const manifest = {
   manifest_version: 3,
-  name: 'jongbugi',
+  name: 'HSU 시간표 마법사',
   version: '1.0.0',
-  description: '종정시',
+  description: '한성대학교 종합정보시스템 시간표 및 수업계획서조회 페이지의 가독성을 높입니다.',
   action: {
     default_popup: 'index.html',
     icons: {
@@ -32,7 +32,7 @@ const manifest = {
       matches: ['*://*/*'],
     },
   ],
-  permissions: ['scripting', 'storage'], // 'activeTab' 제거
+  permissions: ['scripting', 'storage'],
 } as ManifestV3Export;
 
 export default manifest;
