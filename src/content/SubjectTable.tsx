@@ -11,12 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowUp, ArrowDown, ListFilter, ListFilterPlus } from 'lucide-react';
+import { ArrowUp, ArrowDown, ListFilter } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSubjectsTable } from '@/hooks/useSubjectsTable';
 import type { Subject, MasterColumn, DetailColumn } from '@/types/types';
-import CourseDetailModal from './components/CourseDetailModal'; // 모달 컴포넌트 임포트
+import CourseDetailModal from './components/CourseDetailModal';
 import CourseEvaluationModal from './components/CourseEvaluationModal';
+import ListFilterPlus from '@/assets/filter.svg';
 
 const masterColumns: MasterColumn[] = [
   { id: 'kwamokcode', label: '과목코드', width: 65, sortable: false, filterable: false },
@@ -171,7 +172,7 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
           }}
         />
       )}
-      <div className="flex flex-col h-[600px] border rounded-lg overflow-hidden bg-white">
+      <div className="flex flex-col h-[550px] border rounded-lg overflow-hidden bg-white">
         {/* 헤더 */}
         <div className="flex-none p-4 bg-white border-b">
           <h2 className="text-xl font-semibold">개설 과목</h2>
@@ -225,9 +226,9 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                             >
                               <PopoverTrigger asChild>
                                 <Button
-                                  variant={filters[col.id]?.size > 0 ? 'secondary' : 'ghost'}
+                                  variant={'ghost'}
                                   size="sm"
-                                  className="flex-shrink-0 px-1 py-0"
+                                  className={`flex-shrink-0 px-1 py-0 shadow-none`}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setOpenPopover((prev) => ({
@@ -237,7 +238,7 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                   }}
                                 >
                                   {filters[col.id]?.size > 0 ? (
-                                    <ListFilterPlus className="h-3 w-3" />
+                                    <img src={ListFilterPlus} className="p-0 m-0 h-4 w-4" />
                                   ) : (
                                     <ListFilter className="h-3 w-3" />
                                   )}
@@ -287,6 +288,20 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                     onClick={() => clearAllFilters(col.id)}
                                   >
                                     모두 지우기
+                                  </Button>
+                                  <Button
+                                    variant={'default'}
+                                    size="sm"
+                                    className="mt-1 w-full"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setOpenPopover((prev) => ({
+                                        ...prev,
+                                        [col.id]: !prev[col.id],
+                                      }));
+                                    }}
+                                  >
+                                    닫기
                                   </Button>
                                 </div>
                               </PopoverContent>

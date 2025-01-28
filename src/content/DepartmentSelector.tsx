@@ -170,7 +170,7 @@ const DepartmentSelector: React.FC = () => {
   }
 
   return (
-    <div className="font-sans p-6 max-w-4xl mx-auto">
+    <div className="m-0 p-0">
       <div className="mb-6 grid grid-cols-3 gap-4">
         {/* 년도 선택 */}
         <div className="space-y-2">
@@ -226,7 +226,7 @@ const DepartmentSelector: React.FC = () => {
                 {selectedTrack === null ? '선택해주세요' : selectedTrack}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[800px] bg-zinc-50 p-4 rounded-xl shadow-xl z-50">
+            <PopoverContent className="absolute w-[800px] bg-zinc-50 p-4 rounded-xl shadow-xl z-50 left-[-500px]">
               <div className="mb-6 relative">
                 <Input
                   type="text"
@@ -240,7 +240,10 @@ const DepartmentSelector: React.FC = () => {
                     {searchResults.map((result) => (
                       <button
                         key={result.tcd}
-                        onClick={() => handleSearchSelect(result)}
+                        onClick={() => {
+                          handleSearchSelect(result);
+                          setPopoverOpen(false);
+                        }}
                         className="w-full text-left px-4 py-2 hover:bg-zinc-50"
                       >
                         {result.tnm} ({result.university} - {result.faculty})
