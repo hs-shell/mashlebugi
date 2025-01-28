@@ -15,16 +15,33 @@ export function CourseEvaluationModal({ code, onClose }: ModalProp) {
   const [courseEvaluation, setCourseEvaluation] = useState<CourseEvaluation | null>(null);
   const shadowRoot = useContext(ShadowRootContext);
 
+  const [isVisible, setIsVisible] = useState(false);
+
   useEffect(() => {
     if (code) {
       fetchCourseEvaluationData({ code, setCourseEvaluation });
     }
+
+    setIsVisible(true);
+
+    return () => {
+      setIsVisible(false);
+    };
   }, [code]);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
 
   const modalContent = (
     <div
-      className="fixed left-40 inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={onClose}
+      className={`fixed inset-0 z-50 left-44 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
+      onClick={handleClose}
     >
       <div className="bg-white rounded-lg shadow-lg w-3/4 max-w-2xl p-6 relative" onClick={(e) => e.stopPropagation()}>
         {/* 닫기 버튼 */}

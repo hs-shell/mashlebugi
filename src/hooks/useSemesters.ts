@@ -1,4 +1,3 @@
-// hooks/useSemesters.ts
 import { useState, useEffect } from 'react';
 import { Semester } from '@/types/types';
 import { fetchSemesterData } from './fetchAPI';

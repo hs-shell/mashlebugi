@@ -167,13 +167,13 @@ const DepartmentSelector: React.FC = () => {
 
   const handleYearChange = (year: string) => {
     setSelectedYear(year);
-    setSelectedSemester(null); // 년도 변경 시 학기 초기화
-    // 선택된 대학, 학부, 학과도 초기화
+    setSelectedSemester(null);
     setSelectedUniversity(null);
     setSelectedFaculty(null);
     setSelectedDepartment(null);
     setSelectedTrack(null);
     setGroupedData({});
+    setSubjectsData([]);
   };
 
   const handleSemesterChange = (semester: Semester) => {
@@ -183,6 +183,7 @@ const DepartmentSelector: React.FC = () => {
     setSelectedDepartment(null);
     setSelectedTrack(null);
     setGroupedData({});
+    setSubjectsData([]);
   };
 
   if (loading) {
@@ -277,7 +278,11 @@ const DepartmentSelector: React.FC = () => {
           <Label>학과 선택</Label>
           <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="bg-blue-700 text-white hover:bg-blue-800 hover:text-white">
+              <Button
+                variant="outline"
+                disabled={selectedSemester === null}
+                className={`${selectedTrack === null ? 'bg-white border-zinc-300 text-black hover:bg-zinc-50 hover:text-black shadow-none' : 'bg-blue-700 text-white hover:bg-blue-800 hover:text-white'} `}
+              >
                 {selectedTrack === null ? '선택해주세요' : selectedTrack}
               </Button>
             </PopoverTrigger>

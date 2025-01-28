@@ -18,6 +18,7 @@ import type { Subject, MasterColumn, DetailColumn } from '@/types/types';
 import CourseDetailModal from './components/CourseDetailModal';
 import CourseEvaluationModal from './components/CourseEvaluationModal';
 import ListFilterPlus from '@/assets/filter.svg';
+import CalendarToggle, { ViewType } from './components/calendar-toggle';
 
 const masterColumns: MasterColumn[] = [
   { id: 'kwamokcode', label: '과목코드', width: 65, sortable: false, filterable: false },
@@ -29,13 +30,35 @@ const masterColumns: MasterColumn[] = [
 ];
 
 const detailColumns: DetailColumn[] = [
-  { id: 'juya', label: '주/야', width: 40 },
-  { id: 'bunban', label: '분반', width: 40 },
-  { id: 'prof', label: '교수', width: 60 },
-  { id: 'classroom', label: '강의실', width: 180 },
-  { id: 'cross_juya', label: '주야교차', width: 60 },
+  { id: 'juya', label: '주/야', width: 35 },
+  { id: 'bunban', label: '분반', width: 35 },
+  { id: 'prof', label: '교수', width: 45 },
+  { id: 'classroom', label: '강의실', width: 230 },
+  { id: 'cross_juya', label: '주야교차', width: 50 },
   { id: 'plan', label: '계획서', width: 45 },
 ];
+
+// 교시 패턴을 변환하는 함수
+const convertPeriodsInString = (input: string): string => {
+  const days: { [key: string]: string } = {
+    월: '월',
+    화: '화',
+    수: '수',
+    목: '목',
+    금: '금',
+    토: '토',
+    일: '일',
+  };
+
+  const periodRegex = /([월화수목금])(\d+)(M?)~(\d+)(M?)/g;
+
+  return input.replace(periodRegex, (match, day, startNum, startM, endNum, endM) => {
+    const dayFull = days[day] || day;
+    const start = parseInt(startNum) + 8 + (startM ? ':30' : ':00');
+    const end = parseInt(endNum) + 8 + (endM ? ':30' : ':00');
+    return `${dayFull}${start}~${end}`;
+  });
+};
 
 export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
   const {
@@ -52,7 +75,7 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
   } = useSubjectsTable(sbjs);
 
   const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
-
+  const [view, setView] = useState<ViewType>('clock');
   // 컬럼 너비 상태 관리
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(
     masterColumns.reduce(
@@ -174,8 +197,9 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
       )}
       <div className="flex flex-col h-[550px] border rounded-lg overflow-hidden bg-white">
         {/* 헤더 */}
-        <div className="flex-none p-4 bg-white border-b">
+        <div className="flex p-4 bg-white border-b justify-between items-center">
           <h2 className="text-xl font-semibold">개설 과목</h2>
+          <CalendarToggle view={view} setView={setView} />
         </div>
         {/* 테이블 컨테이너 */}
         <div className="flex-1 flex flex-col min-h-0">
@@ -409,36 +433,42 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                             className="truncate px-4 py-2"
                                           >
                                             <div className="truncate" title={detail[dc.id]}>
-                                              {dc.id === 'prof' ? (
-                                                <a
-                                                  href="#"
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setSelectedProfCode(detail['suup_pyunga']);
-                                                    setIsCourseEvaluationModalOpen(true);
-                                                  }}
-                                                  className="text-blue-500 hover:underline"
-                                                >
-                                                  {detail[dc.id]}
-                                                </a>
-                                              ) : dc.id === 'plan' ? (
-                                                detail.plan ? (
-                                                  <a
-                                                    href="#"
-                                                    onClick={(e) => {
-                                                      e.preventDefault();
-                                                      openPopup(detail.plan);
-                                                    }}
-                                                    className="text-blue-500 hover:underline"
-                                                  >
-                                                    조회
-                                                  </a>
-                                                ) : (
-                                                  '계획서 없음'
-                                                )
-                                              ) : (
-                                                detail[dc.id]
-                                              )}
+                                              {(() => {
+                                                if (dc.id === 'classroom' && view === 'clock') {
+                                                  return convertPeriodsInString(detail[dc.id]);
+                                                } else if (dc.id === 'prof') {
+                                                  return (
+                                                    <a
+                                                      href="#"
+                                                      onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setSelectedProfCode(detail['suup_pyunga']);
+                                                        setIsCourseEvaluationModalOpen(true);
+                                                      }}
+                                                      className="text-blue-500 hover:underline"
+                                                    >
+                                                      {detail[dc.id]}
+                                                    </a>
+                                                  );
+                                                } else if (dc.id === 'plan') {
+                                                  return detail.plan ? (
+                                                    <a
+                                                      href="#"
+                                                      onClick={(e) => {
+                                                        e.preventDefault();
+                                                        openPopup(detail.plan);
+                                                      }}
+                                                      className="text-blue-500 hover:underline"
+                                                    >
+                                                      조회
+                                                    </a>
+                                                  ) : (
+                                                    '계획서 없음'
+                                                  );
+                                                } else {
+                                                  return detail[dc.id];
+                                                }
+                                              })()}
                                             </div>
                                           </TableCell>
                                         ))}
@@ -459,11 +489,8 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
           </div>
         </div>
 
-        {/* 푸터 */}
         <div className="flex-none p-4 bg-white border-t text-right">
-          <p>
-            {filteredAndSorted.length}개 중 {filteredAndSorted.length}개 표시 중
-          </p>
+          <p>{filteredAndSorted.length}개 표시 중</p>
         </div>
       </div>
     </>
