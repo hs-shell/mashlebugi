@@ -118,3 +118,50 @@ export interface CourseEvaluation {
   semester: string;
   score: string;
 }
+
+/**
+ * 수강 잔여 인원
+ */
+
+export interface SugangInwon {
+  gwamokcode: string;
+  bunban: string;
+  gwamokname: string;
+  profname: string;
+  haknean: string;
+  hakjum: string;
+  isu: string;
+  ta1: string;
+  ta2: string;
+  ta3: string;
+  ta4: string;
+  pyun: string;
+  jahaknean: string;
+  total: string;
+  pre_sugang: string;
+  c12: string;
+  c13: string;
+  bigo: string;
+  cross_juya: string;
+  juya: string;
+}
+
+export interface SugangMasterColumn {
+  id: keyof SugangInwon;
+  label: string;
+  width: number;
+  sortable: boolean;
+  filterable: boolean;
+}
+
+export interface SugangDetailColumn {
+  id: keyof SugangInwon;
+  label: string;
+  width: number;
+}
+
+export interface GroupedSugangInwon {
+  gwamokcode: string;
+  master: SugangInwon;
+  details: SugangInwon[];
+}

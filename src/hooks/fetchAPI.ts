@@ -9,6 +9,7 @@ import {
   Subject,
   Description,
   CourseEvaluation,
+  SugangInwon,
 } from '@/types/types';
 import { extractCollegeName, extractDepartmentName, extractFacultyName } from '@/lib/utils';
 
@@ -315,6 +316,67 @@ export const fetchCourseEvaluationData = ({
           semester: '2학기',
         };
         setCourseEvaluation(courseEvaluation);
+      } catch (err) {
+        console.error('XML parsing failed:', err);
+      }
+    } else {
+      console.error('Request failed with status:', xhr.status); // 실패한 응답
+    }
+  };
+
+  xhr.onerror = function () {
+    console.error('Request failed');
+  };
+
+  xhr.send(body);
+};
+
+export const fetchSugangInwonData = ({
+  code,
+  setSugangInwon,
+}: {
+  code: string;
+  setSugangInwon: (setSugangInwon: SugangInwon[]) => void;
+}) => {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://info.hansung.ac.kr/jsp_21/student/kyomu/h_sugang_inwon_s01_new_aui_data.jsp', true);
+  xhr.withCredentials = true;
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  xhr.setRequestHeader('Accept', 'application/xml, text/xml, */*; q=0.01');
+
+  var body = `type=select&junkong=${code}`;
+
+  xhr.onload = async function () {
+    if (xhr.status === 200) {
+      try {
+        const xml = xhr.responseText;
+        const parser = new xml2js.Parser();
+        const result: ParsedXML = await parser.parseStringPromise(xml);
+
+        const items: any[] = result.rows.row;
+        const sugangs: SugangInwon[] = items.map((item: any) => ({
+          gwamokcode: item.gwamokcode?.[0]?.trim() || '',
+          bunban: item.bunban?.[0]?.trim() || '',
+          gwamokname: item.gwamokname?.[0]?.trim() || '',
+          profname: item.profname?.[0]?.trim() || '',
+          haknean: item.haknean?.[0]?.trim() || '',
+          hakjum: item.hakjum?.[0]?.trim() || '',
+          isu: item.isu?.[0]?.trim() || '',
+          ta1: item.ta1?.[0]?.trim() || '',
+          ta2: item.ta2?.[0]?.trim() || '',
+          ta3: item.ta3?.[0]?.trim() || '',
+          ta4: item.ta4?.[0]?.trim() || '',
+          pyun: item.pyun?.[0]?.trim() || '',
+          jahaknean: item.jahaknean?.[0]?.trim() || '',
+          total: item.total?.[0]?.trim() || '',
+          pre_sugang: item.pre_sugang?.[0]?.trim() || '',
+          c12: item.c12?.[0]?.trim() || '',
+          c13: item.c13?.[0]?.trim() || '',
+          bigo: item.bigo?.[0]?.trim() || '',
+          cross_juya: item.cross_juya?.[0]?.trim() || '',
+          juya: item.juya?.[0]?.trim() || '',
+        }));
+        setSugangInwon(sugangs);
       } catch (err) {
         console.error('XML parsing failed:', err);
       }

@@ -6,10 +6,11 @@ import { createShadowRoot } from '@/lib/createShadowRoot';
 import { ShadowRootContext } from '@/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { saveDataToStorage, loadDataFromStorage } from '@/hooks/storage';
+import SugangApp from '@/sugang_inwon/App';
 
 const href = window.location.href;
 
-if (href === 'https://info.hansung.ac.kr/jsp_21/student/kyomu/siganpyo_aui.jsp') {
+if (href.includes('siganpyo_aui.jsp') || href.includes('h_sugang_inwon_s01_new_aui.jsp')) {
   const body = document.querySelector('#div_print_area > div') as HTMLElement | null;
   const row = document.querySelector('#div_print_area > div > div.title') as HTMLElement | null;
   const departmentElement = document.querySelector(
@@ -39,9 +40,7 @@ if (href === 'https://info.hansung.ac.kr/jsp_21/student/kyomu/siganpyo_aui.jsp')
     createRoot(shadowRoot).render(
       <ShadowRootContext.Provider value={shadowRoot}>
         <React.StrictMode>
-          <TooltipProvider>
-            <App />
-          </TooltipProvider>
+          <TooltipProvider>{href.includes('siganpyo_aui.jsp') ? <App /> : <SugangApp />}</TooltipProvider>
         </React.StrictMode>
       </ShadowRootContext.Provider>
     );
