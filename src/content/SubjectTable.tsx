@@ -245,42 +245,46 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent
-                                className="w-[200px] bg-white z-50 p-2 shadow-lg rounded-md"
+                                className={`${col.label === '과목명' ? 'w-[300px]' : 'w-[200px]'} bg-white z-50 p-2 shadow-lg rounded-md`}
                                 onInteractOutside={() => setOpenPopover((prev) => ({ ...prev, [col.id]: false }))}
                               >
                                 <div className="dropdown-menu-content">
                                   <Input
                                     placeholder="검색..."
-                                    className="mb-2"
+                                    className="mb-2 w-full"
                                     value={searchTerms[col.id] || ''}
                                     onChange={(e) => {
                                       setSearchTerms((prev) => ({ ...prev, [col.id]: e.target.value }));
                                     }}
                                   />
-                                  {Object.values(groupedData)
-                                    .map((group) => group.master[col.id])
-                                    .filter((value, index, self) => self.indexOf(value) === index)
-                                    .filter((value) =>
-                                      value.toLowerCase().includes((searchTerms[col.id] || '').toLowerCase())
-                                    )
-                                    .map((val) => (
-                                      <div key={val} className="flex items-center space-x-2 mb-1">
-                                        <Checkbox
-                                          id={`${col.id}-${val}`}
-                                          checked={filters[col.id]?.has(val) || false}
-                                          onCheckedChange={() => {
-                                            handleCheckboxFilterChange(col.id, val);
-                                          }}
-                                          className="w-4 h-4"
-                                        />
-                                        <label
-                                          htmlFor={`${col.id}-${val}`}
-                                          className="text-sm flex-grow cursor-pointer"
-                                        >
-                                          {val}
-                                        </label>
-                                      </div>
-                                    ))}
+                                  <div
+                                    className={`${col.label === '과목명' ? 'grid grid-cols-1 sm:grid-cols-2 gap-2' : 'grid grid-cols-1'} overflow-y-scroll max-h-60 overscroll-contain`}
+                                  >
+                                    {Object.values(groupedData)
+                                      .map((group) => group.master[col.id])
+                                      .filter((value, index, self) => self.indexOf(value) === index)
+                                      .filter((value) =>
+                                        value.toLowerCase().includes((searchTerms[col.id] || '').toLowerCase())
+                                      )
+                                      .map((val) => (
+                                        <div key={val} className="flex items-center space-x-2 mb-1">
+                                          <Checkbox
+                                            id={`${col.id}-${val}`}
+                                            checked={filters[col.id]?.has(val) || false}
+                                            onCheckedChange={() => {
+                                              handleCheckboxFilterChange(col.id, val);
+                                            }}
+                                            className="w-4 h-4"
+                                          />
+                                          <label
+                                            htmlFor={`${col.id}-${val}`}
+                                            className="text-sm flex-grow cursor-pointer overflow-hidden text-ellipsis line-clamp-1"
+                                          >
+                                            {col.label === '과목구분' && val === '' ? '없음' : val}
+                                          </label>
+                                        </div>
+                                      ))}
+                                  </div>
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -354,7 +358,6 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                 variant={'ghost'}
                                 className="text-blue-500 hover:underline"
                                 onClick={(e) => {
-                                  console.log(group.master.kwamokcode);
                                   e.stopPropagation();
                                   setSelectedCode(group.master.kwamokcode);
                                   setIsCourseDetailModalOpen(true);

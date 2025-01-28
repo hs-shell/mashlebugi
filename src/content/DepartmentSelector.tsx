@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover } from '@/components/ui/popover';
 import { PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { Button } from '@/components/ui/button';
+import { loadDataFromStorage } from '@/hooks/storage';
+import { Check, ChevronDown } from 'lucide-react';
 
 interface DepartmentSearchResult extends Department {
   university: string;
@@ -33,7 +35,10 @@ const DepartmentSelector: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  const [isYearOpen, setIsYearOpen] = useState(false);
+  const [isSemesterOpen, setIsSemesterOpen] = useState(false);
   useEffect(() => {
     const fetchAndGroupXML = async () => {
       try {
@@ -43,7 +48,6 @@ const DepartmentSelector: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchAndGroupXML();
   }, []);
 
@@ -119,6 +123,27 @@ const DepartmentSelector: React.FC = () => {
     setSearchResults(results);
   }, [searchTerm, groupedData]);
 
+  useEffect(() => {
+    if (isInitialized || !groupedData || Object.keys(groupedData).length === 0) return;
+
+    setIsInitialized(true);
+    loadDataFromStorage('department', (data: string | null) => {
+      if (!data) return;
+      Object.entries(groupedData).forEach(([university, faculties]) => {
+        Object.entries(faculties).forEach(([faculty, departments]) => {
+          departments.forEach((dept) => {
+            if (dept.tnm.toLowerCase().includes(data)) {
+              setSelectedDepartment({ university: university, faculty: faculty, tcd: dept.tcd, tnm: dept.tnm });
+              setSelectedUniversity(university);
+              setSelectedFaculty(faculty);
+              setSelectedTrack(dept.tnm);
+            }
+          });
+        });
+      });
+    });
+  }, [groupedData, isInitialized]);
+
   // 학과 검색 결과 선택 핸들러
   const handleSearchSelect = (result: DepartmentSearchResult) => {
     setSelectedUniversity(result.university);
@@ -147,16 +172,17 @@ const DepartmentSelector: React.FC = () => {
     setSelectedUniversity(null);
     setSelectedFaculty(null);
     setSelectedDepartment(null);
-    setGroupedData({}); // groupedData도 초기화
+    setSelectedTrack(null);
+    setGroupedData({});
   };
 
   const handleSemesterChange = (semester: Semester) => {
     setSelectedSemester(semester);
-    // 선택된 대학, 학부, 학과도 초기화
     setSelectedUniversity(null);
     setSelectedFaculty(null);
     setSelectedDepartment(null);
-    setGroupedData({}); // groupedData도 초기화
+    setSelectedTrack(null);
+    setGroupedData({});
   };
 
   if (loading) {
@@ -174,48 +200,77 @@ const DepartmentSelector: React.FC = () => {
       <div className="mb-6 grid grid-cols-3 gap-4">
         {/* 년도 선택 */}
         <div className="space-y-2">
-          <Label htmlFor="year-select">년도 선택</Label>
-          <Select value={selectedYear || ''} onValueChange={(value) => handleYearChange(value)}>
-            <SelectTrigger id="year-select" className="bg-white">
-              <SelectValue placeholder="년도 선택" />
-            </SelectTrigger>
-            <SelectContent className="bg-white rounded-lg z-50">
-              {Object.keys(semestersData)
-                .sort((a, b) => Number.parseInt(b) - Number.parseInt(a)) // 내림차순 정렬
-                .map((year) => (
-                  <SelectItem key={year} value={year} className="py-1 z-50">
-                    {year}년
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="year-popover">년도 선택</Label>
+          <Popover open={isYearOpen} onOpenChange={setIsYearOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                id="year-popover"
+                variant={'default'}
+                className="bg-white justify-between hover:bg-white text-black w-full border border-zinc-300 rounded-md p-2 text-left shadow-none"
+              >
+                {selectedYear ? `${selectedYear}년` : '년도 선택'}
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[120px] bg-white rounded-lg z-50 shadow-lg overflow-y-auto max-h-60 p-2 overscroll-contain">
+              <ul className="grid grid-cols-1 w-full">
+                {Object.keys(semestersData)
+                  .sort((a, b) => Number.parseInt(b) - Number.parseInt(a))
+                  .map((year) => (
+                    <Button
+                      variant={'ghost'}
+                      key={year}
+                      onClick={() => {
+                        setIsYearOpen(false);
+                        if (year === selectedYear) return;
+                        handleYearChange(year);
+                      }}
+                      className="justify-between py-2 px-4 w-full hover:bg-zinc-100 cursor-pointer rounded-md"
+                    >
+                      {year}년 {selectedYear === year ? <Check className="ml-2 h-4 w-4 shrink-0 opacity-100" /> : ' '}
+                    </Button>
+                  ))}
+              </ul>
+            </PopoverContent>
+          </Popover>
         </div>
 
-        {/* 학기 선택 */}
+        {/* 학기선택 */}
         <div className="space-y-2">
           <Label htmlFor="semester-select">학기 선택</Label>
-          <Select
-            value={selectedSemester?.tcd || ''}
-            onValueChange={(value) => {
-              const semester = semestersData[selectedYear!]?.find((s) => s.tcd === value);
-              if (semester) {
-                handleSemesterChange(semester);
-              }
-            }}
-            disabled={!selectedYear}
-          >
-            <SelectTrigger id="semester-select" className="bg-white">
-              <SelectValue placeholder="학기 선택" />
-            </SelectTrigger>
-            <SelectContent className="bg-white rounded-lg z-50">
-              {selectedYear &&
-                semestersData[selectedYear].map((semester) => (
-                  <SelectItem key={semester.tcd} value={semester.tcd} className="py-1 px-2 z-50">
-                    {semester.tnm}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
+          <Popover open={isSemesterOpen} onOpenChange={setIsSemesterOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                id="semester-popover"
+                variant={'default'}
+                disabled={!selectedYear}
+                className="bg-white justify-between hover:bg-white text-black w-full border border-zinc-300 rounded-md p-2 text-left shadow-none"
+              >
+                {selectedSemester ? `${selectedSemester.tnm}` : '학기 선택'}
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[120px] bg-white rounded-lg z-50 shadow-lg overflow-y-auto max-h-60 p-2 overscroll-contain">
+              <ul className="grid grid-cols-1 w-full">
+                {selectedYear &&
+                  semestersData[selectedYear].map((semester) => (
+                    <Button
+                      variant={'ghost'}
+                      key={semester.tcd}
+                      onClick={() => {
+                        setIsSemesterOpen(false);
+                        if (semester === selectedSemester) return;
+                        handleSemesterChange(semester);
+                      }}
+                      className="justify-between py-2 px-4 w-full hover:bg-zinc-100 cursor-pointer rounded-md"
+                    >
+                      {semester.tnm}{' '}
+                      {selectedSemester === semester ? <Check className="ml-2 h-4 w-4 shrink-0 opacity-100" /> : ' '}
+                    </Button>
+                  ))}
+              </ul>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="grid grid-cols-1 space-y-2">
