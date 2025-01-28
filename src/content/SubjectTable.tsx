@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -15,11 +15,11 @@ import { ArrowUp, ArrowDown, ListFilter, ListFilterPlus } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSubjectsTable } from '@/hooks/useSubjectsTable';
 import type { Subject, MasterColumn, DetailColumn } from '@/types/types';
-import { CourseDescriptionModal } from './components/course-detail-modal';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import CourseDetailModal from './components/CourseDetailModal'; // 모달 컴포넌트 임포트
+import CourseEvaluationModal from './components/CourseEvaluationModal';
 
 const masterColumns: MasterColumn[] = [
-  { id: 'kwamokcode', label: '과목코드', width: 60, sortable: false, filterable: false },
+  { id: 'kwamokcode', label: '과목코드', width: 65, sortable: false, filterable: false },
   { id: 'kwamokname', label: '과목명', width: 160, sortable: true, filterable: true },
   { id: 'isugubun', label: '이수구분', width: 80, sortable: false, filterable: true },
   { id: 'hakjum', label: '학점', width: 60, sortable: true, filterable: true },
@@ -135,17 +135,47 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
     );
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // 모달 상태 관리
+  const [isCourseDetailModalOpen, setIsCourseDetailModalOpen] = useState(false);
   const [selectedCode, setSelectedCode] = useState<string>('');
+
+  const [isCourseEvaluationModalOpen, setIsCourseEvaluationModalOpen] = useState(false);
+  const [selectedProfCode, setSelectedProfCode] = useState<string>('');
+
+  useEffect(() => {
+    if (isCourseDetailModalOpen || isCourseEvaluationModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isCourseDetailModalOpen, isCourseEvaluationModalOpen]);
+
   return (
     <>
-      <CourseDescriptionModal code={selectedCode} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+      {isCourseEvaluationModalOpen && (
+        <CourseEvaluationModal
+          code={selectedProfCode}
+          onClose={() => {
+            setIsCourseEvaluationModalOpen(false);
+          }}
+        />
+      )}
+      {isCourseDetailModalOpen && (
+        <CourseDetailModal
+          code={selectedCode}
+          onClose={() => {
+            setIsCourseDetailModalOpen(false);
+          }}
+        />
+      )}
       <div className="flex flex-col h-[600px] border rounded-lg overflow-hidden bg-white">
         {/* 헤더 */}
         <div className="flex-none p-4 bg-white border-b">
           <h2 className="text-xl font-semibold">개설 과목</h2>
         </div>
-
         {/* 테이블 컨테이너 */}
         <div className="flex-1 flex flex-col min-h-0">
           {/* 테이블 헤더 */}
@@ -283,7 +313,7 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
           </div>
 
           {/* 스크롤 가능한 테이블 바디 */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 overflow-y-auto min-h-0 overscroll-contain">
             <Table className="table-fixed w-full">
               <TableBody>
                 <AnimatePresence>
@@ -312,7 +342,7 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                   console.log(group.master.kwamokcode);
                                   e.stopPropagation();
                                   setSelectedCode(group.master.kwamokcode);
-                                  setIsModalOpen(true);
+                                  setIsCourseDetailModalOpen(true);
                                 }}
                               >
                                 {group[col.id]}
@@ -347,7 +377,6 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                           <div className="truncate px-2 py-1" title={dc.label}>
                                             {dc.label}
                                           </div>
-                                          {/* 리사이저 핸들 (필요 시) */}
                                         </TableHeaderCell>
                                       ))}
                                     </TableRow>
@@ -359,16 +388,28 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                           <TableCell
                                             key={dc.id}
                                             style={{ width: dc.width }}
-                                            className="truncate px-4 py-2" // 패딩 증가
+                                            className="truncate px-4 py-2"
                                           >
                                             <div className="truncate" title={detail[dc.id]}>
-                                              {dc.id === 'plan' ? (
+                                              {dc.id === 'prof' ? (
+                                                <a
+                                                  href="#"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setSelectedProfCode(detail['suup_pyunga']);
+                                                    setIsCourseEvaluationModalOpen(true);
+                                                  }}
+                                                  className="text-blue-500 hover:underline"
+                                                >
+                                                  {detail[dc.id]}
+                                                </a>
+                                              ) : dc.id === 'plan' ? (
                                                 detail.plan ? (
                                                   <a
                                                     href="#"
                                                     onClick={(e) => {
-                                                      e.preventDefault(); // 기본 링크 동작 방지
-                                                      openPopup(detail.plan); // 팝업 창 열기
+                                                      e.preventDefault();
+                                                      openPopup(detail.plan);
                                                     }}
                                                     className="text-blue-500 hover:underline"
                                                   >
@@ -410,3 +451,5 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
     </>
   );
 };
+
+export default SubjectsTable;
