@@ -105,7 +105,16 @@ export interface DetailColumn {
 
 export interface Description {
   code: string;
-  code_values: string;
+  code_value: string;
   comment: string;
   ecomment: string;
+}
+
+export interface CourseEvaluation {
+  courseCode: string;
+  courseName: string;
+  professor: string;
+  academicYear: string;
+  semester: string;
+  score: string;
 }

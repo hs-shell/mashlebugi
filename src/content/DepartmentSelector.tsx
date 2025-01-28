@@ -123,6 +123,7 @@ const DepartmentSelector: React.FC = () => {
   const handleSearchSelect = (result: DepartmentSearchResult) => {
     setSelectedUniversity(result.university);
     setSelectedFaculty(result.faculty);
+    setSelectedTrack(result.tnm);
     setSelectedDepartment(result);
     setSearchTerm('');
     setSearchResults([]);
@@ -218,18 +219,14 @@ const DepartmentSelector: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 space-y-2">
-          <Label htmlFor="year-select">학과 선택</Label>
-          <Popover open={popoverOpen}>
+          <Label>학과 선택</Label>
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                onClick={() => setPopoverOpen((prev) => !prev)}
-                className="bg-blue-700 text-white hover:bg-blue-800 hover:text-white"
-              >
+              <Button variant="outline" className="bg-blue-700 text-white hover:bg-blue-800 hover:text-white">
                 {selectedTrack === null ? '선택해주세요' : selectedTrack}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[800px] bg-gray-100 p-6 rounded-xl shadow-xl z-50">
+            <PopoverContent className="w-[800px] bg-zinc-50 p-4 rounded-xl shadow-xl z-50">
               <div className="mb-6 relative">
                 <Input
                   type="text"
@@ -244,7 +241,7 @@ const DepartmentSelector: React.FC = () => {
                       <button
                         key={result.tcd}
                         onClick={() => handleSearchSelect(result)}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        className="w-full text-left px-4 py-2 hover:bg-zinc-50"
                       >
                         {result.tnm} ({result.university} - {result.faculty})
                       </button>
@@ -258,7 +255,7 @@ const DepartmentSelector: React.FC = () => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="bg-white shadow-md border-none">
                   <CardHeader>
                     <CardTitle className="text-base font-semibold">단과대</CardTitle>
@@ -273,7 +270,7 @@ const DepartmentSelector: React.FC = () => {
                             className={`p-3 rounded-lg text-left transition-colors duration-200 ${
                               selectedUniversity === university
                                 ? 'bg-blue-700 text-white'
-                                : 'bg-gray-100 text-gray-800 hover:bg-blue-700 hover:text-white'
+                                : 'bg-zinc-100 text-gray-800 hover:bg-blue-700 hover:text-white'
                             }`}
                           >
                             {university}
@@ -302,7 +299,7 @@ const DepartmentSelector: React.FC = () => {
                               className={`p-3 rounded-lg text-left transition-colors duration-200 ${
                                 selectedFaculty === faculty
                                   ? 'bg-blue-700 text-white'
-                                  : 'bg-gray-100 text-gray-800 hover:bg-blue-700 hover:text-white'
+                                  : 'bg-zinc-100 text-gray-800 hover:bg-blue-700 hover:text-white'
                               }`}
                             >
                               {faculty}
@@ -332,7 +329,7 @@ const DepartmentSelector: React.FC = () => {
                               className={`p-3 rounded-lg text-left transition-colors duration-200 ${
                                 selectedTrack === track.tnm
                                   ? 'bg-blue-700 text-white'
-                                  : 'bg-gray-100 text-gray-800 hover:bg-blue-700 hover:text-white'
+                                  : 'bg-zinc-100 text-gray-800 hover:bg-blue-700 hover:text-white'
                               }`}
                               onClick={() => {
                                 handleSearchSelect({
@@ -341,6 +338,7 @@ const DepartmentSelector: React.FC = () => {
                                   faculty: selectedFaculty,
                                 });
                                 setSelectedTrack(track.tnm);
+                                setPopoverOpen(false);
                               }}
                             >
                               {track.tnm}
