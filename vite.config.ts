@@ -30,7 +30,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: 'index.html',
-        options: 'options.html', // 옵션 페이지 추가
       },
     },
   },

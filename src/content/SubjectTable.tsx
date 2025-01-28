@@ -11,12 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowUp, ArrowDown, ListFilter, ListFilterPlus } from 'lucide-react';
+import { ArrowUp, ArrowDown, ListFilter } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSubjectsTable } from '@/hooks/useSubjectsTable';
 import type { Subject, MasterColumn, DetailColumn } from '@/types/types';
-import CourseDetailModal from './components/CourseDetailModal'; // 모달 컴포넌트 임포트
+import CourseDetailModal from './components/CourseDetailModal';
 import CourseEvaluationModal from './components/CourseEvaluationModal';
+import ListFilterPlus from '@/assets/filter.svg';
 
 const masterColumns: MasterColumn[] = [
   { id: 'kwamokcode', label: '과목코드', width: 65, sortable: false, filterable: false },
@@ -171,7 +172,7 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
           }}
         />
       )}
-      <div className="flex flex-col h-[600px] border rounded-lg overflow-hidden bg-white">
+      <div className="flex flex-col h-[550px] border rounded-lg overflow-hidden bg-white">
         {/* 헤더 */}
         <div className="flex-none p-4 bg-white border-b">
           <h2 className="text-xl font-semibold">개설 과목</h2>
@@ -225,9 +226,9 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                             >
                               <PopoverTrigger asChild>
                                 <Button
-                                  variant={filters[col.id]?.size > 0 ? 'secondary' : 'ghost'}
+                                  variant={'ghost'}
                                   size="sm"
-                                  className="flex-shrink-0 px-1 py-0"
+                                  className={`flex-shrink-0 px-1 py-0 shadow-none`}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setOpenPopover((prev) => ({
@@ -237,49 +238,53 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                   }}
                                 >
                                   {filters[col.id]?.size > 0 ? (
-                                    <ListFilterPlus className="h-3 w-3" />
+                                    <img src={ListFilterPlus} className="p-0 m-0 h-4 w-4" />
                                   ) : (
                                     <ListFilter className="h-3 w-3" />
                                   )}
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent
-                                className="w-[200px] bg-white z-50 p-2 shadow-lg rounded-md"
+                                className={`${col.label === '과목명' ? 'w-[300px]' : 'w-[200px]'} bg-white z-50 p-2 shadow-lg rounded-md`}
                                 onInteractOutside={() => setOpenPopover((prev) => ({ ...prev, [col.id]: false }))}
                               >
                                 <div className="dropdown-menu-content">
                                   <Input
                                     placeholder="검색..."
-                                    className="mb-2"
+                                    className="mb-2 w-full"
                                     value={searchTerms[col.id] || ''}
                                     onChange={(e) => {
                                       setSearchTerms((prev) => ({ ...prev, [col.id]: e.target.value }));
                                     }}
                                   />
-                                  {Object.values(groupedData)
-                                    .map((group) => group.master[col.id])
-                                    .filter((value, index, self) => self.indexOf(value) === index)
-                                    .filter((value) =>
-                                      value.toLowerCase().includes((searchTerms[col.id] || '').toLowerCase())
-                                    )
-                                    .map((val) => (
-                                      <div key={val} className="flex items-center space-x-2 mb-1">
-                                        <Checkbox
-                                          id={`${col.id}-${val}`}
-                                          checked={filters[col.id]?.has(val) || false}
-                                          onCheckedChange={() => {
-                                            handleCheckboxFilterChange(col.id, val);
-                                          }}
-                                          className="w-4 h-4"
-                                        />
-                                        <label
-                                          htmlFor={`${col.id}-${val}`}
-                                          className="text-sm flex-grow cursor-pointer"
-                                        >
-                                          {val}
-                                        </label>
-                                      </div>
-                                    ))}
+                                  <div
+                                    className={`${col.label === '과목명' ? 'grid grid-cols-1 sm:grid-cols-2 gap-2' : 'grid grid-cols-1'} overflow-y-scroll max-h-60 overscroll-contain`}
+                                  >
+                                    {Object.values(groupedData)
+                                      .map((group) => group.master[col.id])
+                                      .filter((value, index, self) => self.indexOf(value) === index)
+                                      .filter((value) =>
+                                        value.toLowerCase().includes((searchTerms[col.id] || '').toLowerCase())
+                                      )
+                                      .map((val) => (
+                                        <div key={val} className="flex items-center space-x-2 mb-1">
+                                          <Checkbox
+                                            id={`${col.id}-${val}`}
+                                            checked={filters[col.id]?.has(val) || false}
+                                            onCheckedChange={() => {
+                                              handleCheckboxFilterChange(col.id, val);
+                                            }}
+                                            className="w-4 h-4"
+                                          />
+                                          <label
+                                            htmlFor={`${col.id}-${val}`}
+                                            className="text-sm flex-grow cursor-pointer overflow-hidden text-ellipsis line-clamp-1"
+                                          >
+                                            {col.label === '과목구분' && val === '' ? '없음' : val}
+                                          </label>
+                                        </div>
+                                      ))}
+                                  </div>
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -287,6 +292,20 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                     onClick={() => clearAllFilters(col.id)}
                                   >
                                     모두 지우기
+                                  </Button>
+                                  <Button
+                                    variant={'default'}
+                                    size="sm"
+                                    className="mt-1 w-full"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setOpenPopover((prev) => ({
+                                        ...prev,
+                                        [col.id]: !prev[col.id],
+                                      }));
+                                    }}
+                                  >
+                                    닫기
                                   </Button>
                                 </div>
                               </PopoverContent>
@@ -339,7 +358,6 @@ export const SubjectsTable: React.FC<{ sbjs: Subject[] }> = ({ sbjs }) => {
                                 variant={'ghost'}
                                 className="text-blue-500 hover:underline"
                                 onClick={(e) => {
-                                  console.log(group.master.kwamokcode);
                                   e.stopPropagation();
                                   setSelectedCode(group.master.kwamokcode);
                                   setIsCourseDetailModalOpen(true);

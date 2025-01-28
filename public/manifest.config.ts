@@ -20,9 +20,6 @@ const manifest = {
     '48': 'images/icon/icon-48.png',
     '128': 'images/icon/icon-128.png',
   },
-  background: {
-    service_worker: 'src/background.ts',
-  },
   content_scripts: [
     {
       matches: ['https://info.hansung.ac.kr/jsp_21/student/kyomu/**'],
@@ -35,9 +32,7 @@ const manifest = {
       matches: ['*://*/*'],
     },
   ],
-  options_page: '/options.html',
-  permissions: ['scripting', 'storage', 'activeTab'],
-  host_permissions: ['https://*/*', 'http://*/*'],
+  permissions: ['scripting', 'storage'], // 'activeTab' 제거
 } as ManifestV3Export;
 
 export default manifest;

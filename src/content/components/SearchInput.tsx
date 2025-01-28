@@ -7,9 +7,16 @@ interface SearchInputProps {
   onSearchChange: (term: string) => void;
   searchResults: any[]; // 타입을 구체적으로 지정하세요.
   onSelectResult: (result: any) => void; // 타입을 구체적으로 지정하세요.
+  onClose: () => void;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ searchTerm, onSearchChange, searchResults, onSelectResult }) => {
+const SearchInput: React.FC<SearchInputProps> = ({
+  searchTerm,
+  onSearchChange,
+  searchResults,
+  onSelectResult,
+  onClose,
+}) => {
   return (
     <div className="mb-6 relative">
       <Input
@@ -27,7 +34,10 @@ const SearchInput: React.FC<SearchInputProps> = ({ searchTerm, onSearchChange, s
               {searchResults.map((result) => (
                 <button
                   key={result.tcd}
-                  onClick={() => onSelectResult(result)}
+                  onClick={() => {
+                    onSelectResult(result);
+                    onClose();
+                  }}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
                 >
                   {result.tnm} ({result.university} - {result.faculty})
