@@ -13,22 +13,43 @@ interface ModalProps {
 
 const CourseDetailModal: React.FC<ModalProps> = ({ code, onClose }: ModalProps) => {
   const [description, setDescription] = useState<Description | null>(null);
-  const shadowRoot = useContext(ShadowRootContext); // ShadowRootContext 사용
+  const [isVisible, setIsVisible] = useState(false);
+  const shadowRoot = useContext(ShadowRootContext);
 
   useEffect(() => {
     if (code) {
       fetchCourseDescriptionData({ code, setDescription });
     }
+
+    setIsVisible(true);
+
+    return () => {
+      setIsVisible(false);
+    };
   }, [code]);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
 
   const modalContent = (
     <div
-      className="fixed left-40 inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={onClose}
+      className={`fixed inset-0 z-50 left-44 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
+      onClick={handleClose}
     >
-      <div className="bg-white rounded-lg shadow-lg w-3/4 max-w-2xl p-6 relative" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`bg-white rounded-lg shadow-lg w-3/4 max-w-2xl p-6 relative transform transition-transform duration-300 ${
+          isVisible ? 'scale-100' : 'scale-95'
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* 닫기 버튼 */}
-        <Button onClick={onClose} className="absolute top-2 right-2" variant="ghost">
+        <Button onClick={handleClose} className="absolute top-2 right-2" variant="ghost">
           ×
         </Button>
         {description ? (

@@ -1,4 +1,3 @@
-// hooks/useSubjects.ts
 import { useState, useEffect } from 'react';
 import { Subject } from '@/types/types';
 import { fetchSubjectsData } from './fetchAPI';

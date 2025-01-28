@@ -9,6 +9,7 @@ export function useSubjectsTable(sbjs: Subject[]) {
 
   const groupedData: GroupedSubject[] = useMemo(() => {
     const map = new Map<string, Subject[]>();
+    setFilters({});
     sbjs.forEach((subj) => {
       const list = map.get(subj.kwamokcode) || [];
       list.push(subj);
@@ -70,9 +71,16 @@ export function useSubjectsTable(sbjs: Subject[]) {
 
     if (sortColumn) {
       data.sort((a, b) => {
-        const valA = String(a.master[sortColumn] || '');
-        const valB = String(b.master[sortColumn] || '');
-        return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        const valA = a.master[sortColumn];
+        const valB = b.master[sortColumn];
+
+        // 숫자와 문자열을 구분하여 정렬
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          return sortDirection === 'asc' ? valA - valB : valB - valA;
+        }
+        const strValA = String(valA || '');
+        const strValB = String(valB || '');
+        return sortDirection === 'asc' ? strValA.localeCompare(strValB) : strValB.localeCompare(strValA);
       });
     }
 
