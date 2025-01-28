@@ -160,4 +160,18 @@
     cursor: col-resize;
     user-select: none;
   }
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
+  .overscroll-none {
+    overscroll-behavior: none;
+  }
+  :host .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
+  :host .overscroll-none {
+    overscroll-behavior: none;
+  }
 }
