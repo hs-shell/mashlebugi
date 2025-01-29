@@ -1,26 +1,10 @@
 import { useState, useMemo } from 'react';
-import type { SugangInwon, GroupedSugangInwon, SortDirection } from '@/types/types';
+import type { SugangInwon, SortDirection } from '@/types/types';
 
 export function useSugangInwonTable(sugangs: SugangInwon[]) {
   const [sortColumn, setSortColumn] = useState<keyof SugangInwon | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [filters, setFilters] = useState<Record<string, Set<string>>>({});
-  const [expandedSet, setExpandedSet] = useState<Set<string>>(new Set());
-
-  const groupedData: GroupedSugangInwon[] = useMemo(() => {
-    const map = new Map<string, SugangInwon[]>();
-    setFilters({});
-    sugangs.forEach((subj) => {
-      const list = map.get(subj.gwamokcode) || [];
-      list.push(subj);
-      map.set(subj.gwamokcode, list);
-    });
-    return Array.from(map.entries()).map(([gwamokcode, subjects]) => ({
-      gwamokcode,
-      master: subjects[0],
-      details: subjects,
-    }));
-  }, [sugangs]);
 
   const handleSort = (colId: keyof SugangInwon, sortable: boolean) => {
     if (!sortable) return;
@@ -48,36 +32,32 @@ export function useSugangInwonTable(sugangs: SugangInwon[]) {
     setFilters((prev) => ({ ...prev, [colId]: new Set() }));
   };
 
-  const toggleExpand = (gwamokcode: string) => {
-    setExpandedSet((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(gwamokcode)) {
-        newSet.delete(gwamokcode);
-      } else {
-        newSet.add(gwamokcode);
-      }
-      return newSet;
-    });
-  };
-
   const filteredAndSorted = useMemo(() => {
-    const data = groupedData.filter((group) => {
+    let data = sugangs.filter((item) => {
       return Object.entries(filters).every(([colId, setOfVals]) => {
         if (setOfVals.size === 0) return true;
-        const cellValue = String(group.master[colId as keyof SugangInwon] || '');
+        const cellValue = String(item[colId as keyof SugangInwon] || '');
         return setOfVals.has(cellValue);
       });
     });
 
     if (sortColumn) {
-      data.sort((a, b) => {
-        const valA = a.master[sortColumn];
-        const valB = b.master[sortColumn];
+      data = [...data].sort((a, b) => {
+        const valA = a[sortColumn];
+        const valB = b[sortColumn];
 
-        // 숫자와 문자열을 구분하여 정렬
-        if (typeof valA === 'number' && typeof valB === 'number') {
-          return sortDirection === 'asc' ? valA - valB : valB - valA;
+        // 숫자 변환 가능 여부 확인
+        const numA = Number(valA);
+        const numB = Number(valB);
+        const isNumA = !isNaN(numA);
+        const isNumB = !isNaN(numB);
+
+        if (isNumA && isNumB) {
+          // 둘 다 숫자인 경우 숫자 비교
+          return sortDirection === 'asc' ? numA - numB : numB - numA;
         }
+
+        // 둘 다 문자열이거나 하나만 숫자인 경우 문자열 비교
         const strValA = String(valA || '');
         const strValB = String(valB || '');
         return sortDirection === 'asc' ? strValA.localeCompare(strValB) : strValB.localeCompare(strValA);
@@ -85,18 +65,15 @@ export function useSugangInwonTable(sugangs: SugangInwon[]) {
     }
 
     return data;
-  }, [groupedData, filters, sortColumn, sortDirection]);
+  }, [sugangs, filters, sortColumn, sortDirection]);
 
   return {
     sortColumn,
     sortDirection,
     filters,
-    expandedSet,
-    groupedData,
     filteredAndSorted,
     handleSort,
     handleCheckboxFilterChange,
-    toggleExpand,
     clearAllFilters,
   };
 }

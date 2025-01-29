@@ -58,7 +58,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="font-sans p-6 max-w-5xl mx-auto bg-white space-y-6">
+    <div className="font-sans p-6 max-w-7xl mx-auto bg-white space-y-6">
       <motion.div
         initial="hidden"
         animate="visible"
