@@ -43,7 +43,7 @@ jobs:
             }
             return pr.number;
 
-      # 5단계: PR 라벨 가져오기 (공백으로 구분된 문자열로 반환)
+      # 5단계: PR 라벨 가져오기 (콤마로 구분된 문자열로 반환)
       - name: PR 라벨 가져오기
         id: get_labels
         uses: actions/github-script@v6
@@ -55,7 +55,7 @@ jobs:
               repo: context.repo.repo,
               pull_number: prNumber,
             });
-            const labels = pr.data.labels.map(label => label.name).join(' ');
+            const labels = pr.data.labels.map(label => label.name).join(',');
             return labels;
 
       # 6단계: PR 라벨 출력하기
@@ -78,13 +78,17 @@ jobs:
           # 버전 분할
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-          # PR 라벨 가져오기 (공백으로 구분된 문자열)
+          # PR 라벨 가져오기 (콤마로 구분된 문자열을 배열로 변환)
           LABELS="${{ steps.get_labels.outputs.result }}"
           echo "PR 라벨: $LABELS"
 
+          # 콤마를 기준으로 배열로 변환
+          IFS=',' read -r -a LABEL_ARRAY <<< "$LABELS"
+
           # 라벨에 따라 버전 증가 (우선순위: major > minor > patch)
           NEW_VERSION=""
-          for label in $LABELS; do
+          for label in "${LABEL_ARRAY[@]}"; do
+            label=$(echo "$label" | xargs) # 공백 제거
             if [[ "$label" == "🔖 major" ]]; then
               NEW_MAJOR=$((MAJOR + 1))
               NEW_VERSION="$NEW_MAJOR.0.0"
@@ -112,7 +116,7 @@ jobs:
           # 출력 설정
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      # 8단계: package.json 버전 업데이트
+      # 8단계: package.json 및 manifest.config.ts 버전 업데이트
       - name: package.json 및 manifest.config.ts 버전 업데이트
         run: |
           NEW_VERSION=${{ steps.version.outputs.new_version }}
@@ -124,7 +128,7 @@ jobs:
 
           # manifest.config.ts 업데이트
           echo "manifest.config.ts를 버전 $NEW_VERSION으로 업데이트합니다."
-          sed -i 's/\(version: \)'\''[0-9]\+\.[0-9]\+\.[0-9]\+'\''/\1'\'''"$NEW_VERSION"'\''/' manifest.config.ts
+          sed -i "s/\(version: '\)[0-9]\+\.[0-9]\+\.[0-9]\+'/\1$NEW_VERSION'/" manifest.config.ts
 
           echo "🔄 업데이트된 manifest.config.ts 내용:"
           cat manifest.config.ts
@@ -134,7 +138,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
+          git add package.json manifest.config.ts
           git commit -m "🔖 chore: bump version to v${{ steps.version.outputs.new_version }}"
           git push origin main
 
