@@ -96,7 +96,7 @@ const SugangInwonDetailTable: React.FC<DetailTableProps> = ({ group, detailColum
             {detailColumns.map((col) => (
               <TableHeaderCell
                 key={`detail-header-${col.id}`}
-                className="relative overflow-hidden bg-gray-100"
+                className="px-1.5 relative overflow-hidden bg-gray-100"
                 style={{ width: col.width }}
               >
                 <div className="flex items-center justify-between h-full">
@@ -109,7 +109,7 @@ const SugangInwonDetailTable: React.FC<DetailTableProps> = ({ group, detailColum
                         : 'cursor-default flex items-center min-w-0 px-1 py-0.5'
                     }
                   >
-                    <span className="truncate flex-grow min-w-0" title={col.label}>
+                    <span className="truncate flex-grow min-w-0" title={col.label} style={{ fontSize: 13 }}>
                       {col.label}
                     </span>
                     {sortColumn === col.id &&

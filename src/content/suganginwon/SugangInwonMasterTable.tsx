@@ -27,16 +27,17 @@ const masterColumns: SugangMasterColumn[] = [
 ];
 
 const detailColumns: SugangDetailColumn[] = [
-  { id: 'juya', label: '주/야', width: 35, sortable: true, filterable: true },
-  { id: 'bunban', label: '분반', width: 25, sortable: true, filterable: false },
-  { id: 'profname', label: '교수', width: 40, sortable: true, filterable: true },
-  { id: 'ta1', label: '타과1학년', width: 40, sortable: true, filterable: false },
-  { id: 'ta2', label: '타과2학년', width: 40, sortable: true, filterable: false },
-  { id: 'ta3', label: '타과3학년', width: 40, sortable: true, filterable: false },
-  { id: 'ta4', label: '타과4학년', width: 40, sortable: true, filterable: false },
-  { id: 'pyun', label: '편입', width: 25, sortable: true, filterable: false },
+  { id: 'juya', label: '주/야', width: 28, sortable: false, filterable: true },
+  { id: 'bunban', label: '분반', width: 27, sortable: true, filterable: false },
+  { id: 'profname', label: '교수', width: 35, sortable: false, filterable: true },
+  { id: 'cross_juya', label: '교차가능', width: 35, sortable: false, filterable: true },
+  { id: 'ta1', label: '타과1학년', width: 38, sortable: true, filterable: false },
+  { id: 'ta2', label: '타과2학년', width: 38, sortable: true, filterable: false },
+  { id: 'ta3', label: '타과3학년', width: 38, sortable: true, filterable: false },
+  { id: 'ta4', label: '타과4학년', width: 38, sortable: true, filterable: false },
+  { id: 'pyun', label: '편입', width: 28, sortable: true, filterable: false },
   { id: 'jahaknean', label: '자과개설학년', width: 45, sortable: true, filterable: false },
-  { id: 'total', label: '총잔여인원', width: 45, sortable: true, filterable: false },
+  { id: 'total', label: '총잔여인원', width: 42, sortable: true, filterable: false },
   { id: 'pre_sugang', label: '장바구니인원', width: 45, sortable: true, filterable: false },
 ];
 
