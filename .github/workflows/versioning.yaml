@@ -37,19 +37,13 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const ref = context.ref;
-            const sha = context.sha;
-            const pulls = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: sha,
-            });
-            if (pulls.data.length === 0) {
-              throw new Error('해당 커밋과 연관된 PR이 없습니다.');
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              throw new Error('해당 커밋과 연관된 PR을 찾을 수 없습니다.');
             }
-            return pulls.data[0].number;
+            return pr.number;
 
-      # 5단계: PR 라벨 가져오기
+      # 5단계: PR 라벨 가져오기 (공백으로 구분된 문자열로 반환)
       - name: PR 라벨 가져오기
         id: get_labels
         uses: actions/github-script@v6
@@ -61,14 +55,15 @@ jobs:
               repo: context.repo.repo,
               pull_number: prNumber,
             });
-            const labels = pr.data.labels.map(label => label.name);
-            return JSON.stringify(labels);  // JSON 문자열로 반환
+            const labels = pr.data.labels.map(label => label.name).join(' ');
+            return labels;
 
       # 6단계: PR 라벨 출력하기
       - name: PR 라벨 출력하기
         run: |
           echo "PR 라벨: ${{ steps.get_labels.outputs.result }}"
 
+      # 7단계: 다음 버전 결정
       - name: 다음 버전 결정
         id: version
         run: |
@@ -83,13 +78,13 @@ jobs:
           # 버전 분할
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-          # PR 라벨 가져오기 (JSON 배열을 Bash 배열로 변환)
-          LABELS_JSON='${{ steps.get_labels.outputs.result }}'
-          LABELS=($(echo $LABELS_JSON | jq -r '.[]'))
-          echo "PR 라벨: ${LABELS[@]}"
+          # PR 라벨 가져오기 (공백으로 구분된 문자열)
+          LABELS="${{ steps.get_labels.outputs.result }}"
+          echo "PR 라벨: $LABELS"
 
           # 라벨에 따라 버전 증가 (우선순위: major > minor > patch)
-          for label in "${LABELS[@]}"; do
+          NEW_VERSION=""
+          for label in $LABELS; do
             if [[ "$label" == "🔖 major" ]]; then
               NEW_MAJOR=$((MAJOR + 1))
               NEW_VERSION="$NEW_MAJOR.0.0"
