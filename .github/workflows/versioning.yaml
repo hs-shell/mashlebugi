@@ -1,0 +1,119 @@
+name: 버전 관리
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  bump-version:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1단계: 리포지토리 체크아웃
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 모든 히스토리와 태그를 가져옴
+
+      # 2단계: Node.js 설정
+      - name: Node.js 설정
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16' # 프로젝트에 맞는 Node.js 버전 설정
+
+      # 3단계: 의존성 설치
+      - name: 의존성 설치
+        run: npm install
+
+      # 4단계: PR 라벨 가져오기
+      - name: PR 라벨 가져오기
+        id: get_labels
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+            const labels = pr.data.labels.map(label => label.name);
+            return labels;
+
+      # 5단계: 다음 버전 결정
+      - name: 다음 버전 결정
+        id: version
+        run: |
+          # 최신 태그 가져오기
+          LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null || echo "v0.0.0")
+          echo "최신 태그: $LATEST_TAG"
+
+          # 현재 버전 추출
+          CURRENT_VERSION=${LATEST_TAG#v}
+          echo "현재 버전: $CURRENT_VERSION"
+
+          # 버전 분할
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+          # PR 라벨 가져오기
+          LABELS=${{ steps.get_labels.outputs.result }}
+          echo "PR 라벨: $LABELS"
+
+          # 라벨에 따라 버전 증가
+          if echo "$LABELS" | grep -q "🔖 major"; then
+            NEW_MAJOR=$((MAJOR + 1))
+            NEW_VERSION="$NEW_MAJOR.0.0"
+          elif echo "$LABELS" | grep -q "🔖 minor"; then
+            NEW_MINOR=$((MINOR + 1))
+            NEW_VERSION="$MAJOR.$NEW_MINOR.0"
+          elif echo "$LABELS" | grep -q "🔖 patch"; then
+            NEW_PATCH=$((PATCH + 1))
+            NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+          else
+            echo "라벨이 지정되지 않았거나 인식할 수 없습니다. 기본적으로 패치 버전을 증가시킵니다."
+            NEW_PATCH=$((PATCH + 1))
+            NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+          fi
+
+          echo "새 버전: $NEW_VERSION"
+
+          # 출력 설정
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      # 6단계: package.json 버전 업데이트
+      - name: package.json 버전 업데이트
+        run: |
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          echo "package.json을 버전 $NEW_VERSION으로 업데이트합니다."
+          npm version $NEW_VERSION --no-git-tag-version
+          cat package.json
+
+      # 7단계: 변경 사항 커밋 및 푸시
+      - name: 변경 사항 커밋 및 푸시
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: bump version to v${{ steps.version.outputs.new_version }}"
+          git push origin main
+
+      # 8단계: 새 태그 생성 및 푸시
+      - name: 새 태그 생성 및 푸시
+        run: |
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          git tag -a v$NEW_VERSION -m "Release v$NEW_VERSION"
+          git push origin v$NEW_VERSION
+
+      # 9단계: (선택 사항) GitHub 릴리스 생성
+      - name: 릴리스 생성
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          release_name: Release v${{ steps.version.outputs.new_version }}
+          body: 'Release v${{ steps.version.outputs.new_version }}'
+          draft: false
+          prerelease: false
