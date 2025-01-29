@@ -1,12 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+import SubjectApp from './subject/SubjectApp';
 import styles from '@/styles/shadow.css?inline';
 import { createShadowRoot } from '@/lib/createShadowRoot';
 import { ShadowRootContext } from '@/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { saveDataToStorage, loadDataFromStorage } from '@/hooks/storage';
-import SugangApp from '@/sugang_inwon/App';
+import SugangApp from './suganginwon/SugangInwonApp';
 
 const href = window.location.href;
 
@@ -40,7 +40,7 @@ if (href.includes('siganpyo_aui.jsp') || href.includes('h_sugang_inwon_s01_new_a
     createRoot(shadowRoot).render(
       <ShadowRootContext.Provider value={shadowRoot}>
         <React.StrictMode>
-          <TooltipProvider>{href.includes('siganpyo_aui.jsp') ? <App /> : <SugangApp />}</TooltipProvider>
+          <TooltipProvider>{href.includes('siganpyo_aui.jsp') ? <SubjectApp /> : <SugangApp />}</TooltipProvider>
         </React.StrictMode>
       </ShadowRootContext.Provider>
     );

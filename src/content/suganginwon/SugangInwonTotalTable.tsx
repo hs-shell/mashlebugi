@@ -274,7 +274,7 @@ export const SugangInwonTotalTable: React.FC<{
                                       />
                                       <label
                                         htmlFor={`${col.id}-${val}`}
-                                        className="text-sm flex-grow cursor-pointer overflow-hidden text-ellipsis"
+                                        className="text-sm flex-grow cursor-pointer overflow-hidden text-ellipsis line-clamp-1"
                                       >
                                         {col.label === '과목구분' && val === '' ? '없음' : val}
                                       </label>

@@ -7,7 +7,7 @@ const fadeInVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export default function App() {
+export default function SubjectApp() {
   return (
     <div className="font-sans p-6 max-w-5xl mx-auto bg-white space-y-6">
       <motion.div
