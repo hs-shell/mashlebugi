@@ -83,13 +83,12 @@ jobs:
           # 버전 분할
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-          # PR 라벨 가져오기 (JSON 배열을 Bash 배열로 변환)
-          LABELS_JSON='${{ steps.get_labels.outputs.result }}'
-          LABELS=($(echo $LABELS_JSON | jq -r '.[]'))
-          echo "PR 라벨: ${LABELS[@]}"
+          # PR 라벨 가져오기 (공백으로 구분된 문자열을 배열로 변환)
+          LABELS="${{ steps.get_labels.outputs.result }}"
+          echo "PR 라벨: $LABELS"
 
           # 라벨에 따라 버전 증가 (우선순위: major > minor > patch)
-          for label in "${LABELS[@]}"; do
+          for label in $LABELS; do
             if [[ "$label" == "🔖 major" ]]; then
               NEW_MAJOR=$((MAJOR + 1))
               NEW_VERSION="$NEW_MAJOR.0.0"
