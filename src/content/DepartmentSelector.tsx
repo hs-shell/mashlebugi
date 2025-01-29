@@ -128,7 +128,7 @@ const DepartmentSelector: React.FC = () => {
 
     setIsInitialized(true);
     loadDataFromStorage('department', (data: string | null) => {
-      if (!data) return;
+      if (!data) data = '교양필수';
       Object.entries(groupedData).forEach(([university, faculties]) => {
         Object.entries(faculties).forEach(([faculty, departments]) => {
           departments.forEach((dept) => {
@@ -137,6 +137,7 @@ const DepartmentSelector: React.FC = () => {
               setSelectedUniversity(university);
               setSelectedFaculty(faculty);
               setSelectedTrack(dept.tnm);
+              return;
             }
           });
         });
