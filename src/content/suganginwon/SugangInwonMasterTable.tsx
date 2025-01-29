@@ -135,6 +135,7 @@ const SugangInwonMasterTable: React.FC<{
 
   // Popover 상태 관리 (Master)
   const [openPopoverMaster, setOpenPopoverMaster] = useState<Record<string, boolean>>({});
+  const [isScroll, setIsScroll] = useState(false);
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -290,7 +291,7 @@ const SugangInwonMasterTable: React.FC<{
       </div>
 
       {/* 스크롤 가능한 테이블 바디 */}
-      <div className="flex-1 overflow-y-auto min-h-0 overscroll-contain">
+      <div className={`flex-1 ${isScroll ? 'overflow-hidden' : 'overflow-y-auto'} min-h-0 overscroll-contain`}>
         <Table className="table-fixed w-full">
           <TableBody>
             <AnimatePresence>
@@ -329,7 +330,7 @@ const SugangInwonMasterTable: React.FC<{
                         transition={{ duration: 0.3 }}
                       >
                         <TableCell colSpan={masterColumns.length} className="p-0">
-                          <DetailTable group={group} detailColumns={detailColumns} />
+                          <DetailTable group={group} detailColumns={detailColumns} onScroll={setIsScroll} />
                         </TableCell>
                       </motion.tr>
                     )}

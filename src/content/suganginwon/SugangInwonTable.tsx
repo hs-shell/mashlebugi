@@ -13,7 +13,7 @@ const SugangInwonTable: React.FC<{
   return (
     <div className="flex flex-col h-[550px] border rounded-lg overflow-hidden bg-white">
       {/* 헤더 */}
-      <div className="flex p-4 bg-white border-b justify-between items-center">
+      <div className="flex p-4 bg-white border-b justify-between items-center z-10">
         <h2 className="text-xl font-semibold">잔여 인원</h2>
         <TableToggle view={view} setView={setView} />
       </div>
@@ -24,7 +24,7 @@ const SugangInwonTable: React.FC<{
         <SugangInwonTotalTable sugangs={sugangs} setLength={setLength} />
       )}
 
-      <div className="flex-none p-4 bg-white border-t text-right">
+      <div className="flex-none p-4 bg-white border-t text-right z-10">
         <p>{length}개 표시 중</p>
       </div>
     </div>
