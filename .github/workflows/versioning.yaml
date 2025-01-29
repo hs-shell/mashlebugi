@@ -113,21 +113,22 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       # 8단계: package.json 버전 업데이트
-      - name: package.json 및 manifest.config.ts 버전 업데이트
-        run: |
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-          echo "새 버전: $NEW_VERSION"
 
-          # package.json 업데이트
-          echo "package.json을 버전 $NEW_VERSION으로 업데이트합니다."
-          npm version $NEW_VERSION --no-git-tag-version
+  - name: package.json 및 manifest.config.ts 버전 업데이트
+    run: |
+      NEW_VERSION=${{ steps.version.outputs.new_version }}
+      echo "새 버전: $NEW_VERSION"
 
-          # manifest.config.ts 업데이트
-          echo "manifest.config.ts를 버전 $NEW_VERSION으로 업데이트합니다."
-          sed -i 's/\(version: \)'\''[0-9]\+\.[0-9]\+\.[0-9]\+'\''/\1'\'''"$NEW_VERSION"'\''/' manifest.config.ts
+      # package.json 업데이트
+      echo "package.json을 버전 $NEW_VERSION으로 업데이트합니다."
+      npm version $NEW_VERSION --no-git-tag-version
 
-          echo "🔄 업데이트된 manifest.config.ts 내용:"
-          cat manifest.config.ts
+      # manifest.config.ts 업데이트
+      echo "manifest.config.ts를 버전 $NEW_VERSION으로 업데이트합니다."
+      sed -i 's/\(version: \)'\''[0-9]\+\.[0-9]\+\.[0-9]\+'\''/\1'\'''"$NEW_VERSION"'\''/' manifest.config.ts
+
+      echo "🔄 업데이트된 manifest.config.ts 내용:"
+      cat manifest.config.ts
 
       # 9단계: 변경 사항 커밋 및 푸시
       - name: 변경 사항 커밋 및 푸시
