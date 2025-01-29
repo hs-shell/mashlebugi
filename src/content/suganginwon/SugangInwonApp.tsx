@@ -10,7 +10,7 @@ const fadeInVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export default function App() {
+export default function SugangInwonApp() {
   const [groupedData, setGroupedData] = useState<{ [college: string]: { [faculty: string]: Department[] } }>({});
 
   useEffect(() => {
