@@ -20,7 +20,7 @@ jobs:
       - name: Node.js 설정
         uses: actions/setup-node@v3
         with:
-          node-version: '16' # 프로젝트에 맞는 Node.js 버전 설정
+          node-version: '18' # Node.js 18 이상으로 설정
 
       - name: 의존성 설치
         run: npm install
@@ -36,7 +36,7 @@ jobs:
               pull_number: context.payload.pull_request.number,
             });
             const labels = pr.data.labels.map(label => label.name);
-            return labels.join(',');
+            return JSON.stringify(labels);  // JSON 문자열로 반환
 
       - name: PR 라벨 출력하기
         run: |
@@ -56,11 +56,11 @@ jobs:
           # 버전 분할
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-          # PR 라벨 가져오기
-          LABELS="${{ steps.get_labels.outputs.result }}"
+          # PR 라벨 가져오기 (JSON 문자열을 배열로 변환)
+          LABELS=$(echo '${{ steps.get_labels.outputs.result }}' | jq -r '.[]')
           echo "PR 라벨: $LABELS"
 
-          # 라벨에 따라 버전 증가
+          # 라벨에 따라 버전 증가 (우선순위: major > minor > patch)
           if echo "$LABELS" | grep -q "🔖 major"; then
             NEW_MAJOR=$((MAJOR + 1))
             NEW_VERSION="$NEW_MAJOR.0.0"
