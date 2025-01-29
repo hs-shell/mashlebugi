@@ -78,7 +78,7 @@ jobs:
           # 버전 분할
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-          # PR 라벨 가져오기 (콤마로 구분된 문자열을 배열로 변환)
+          # PR 라벨 가져오기 (콤마로 구분된 문자열)
           LABELS="${{ steps.get_labels.outputs.result }}"
           echo "PR 라벨: $LABELS"
 
