@@ -6,42 +6,70 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
   bump-version:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
+      # 1단계: 리포지토리 체크아웃
       - name: 리포지토리 체크아웃
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # 모든 히스토리와 태그를 가져옴
+          fetch-depth: 0  # 모든 히스토리와 태그를 가져옴
 
+      # 2단계: Node.js 설정
       - name: Node.js 설정
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Node.js 18 이상으로 설정
+          node-version: '18'  # Node.js 18 이상으로 설정
 
+      # 3단계: 의존성 설치
       - name: 의존성 설치
         run: npm install
 
+      # 4단계: 최신 커밋에서 PR 번호 가져오기
+      - name: 최신 커밋에서 PR 번호 가져오기
+        id: get_pr_number
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const ref = context.ref;
+            const sha = context.sha;
+            const pulls = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: sha,
+            });
+            if (pulls.data.length === 0) {
+              throw new Error('해당 커밋과 연관된 PR이 없습니다.');
+            }
+            return pulls.data[0].number;
+
+      # 5단계: PR 라벨 가져오기
       - name: PR 라벨 가져오기
         id: get_labels
         uses: actions/github-script@v6
         with:
           script: |
+            const prNumber = ${{ steps.get_pr_number.outputs.result }};
             const pr = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
+              pull_number: prNumber,
             });
             const labels = pr.data.labels.map(label => label.name);
             return JSON.stringify(labels);  // JSON 문자열로 반환
 
+      # 6단계: PR 라벨 출력하기
       - name: PR 라벨 출력하기
         run: |
           echo "PR 라벨: ${{ steps.get_labels.outputs.result }}"
 
+      # 7단계: 다음 버전 결정
       - name: 다음 버전 결정
         id: version
         run: |
@@ -81,6 +109,7 @@ jobs:
           # 출력 설정
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
+      # 8단계: package.json 버전 업데이트
       - name: package.json 버전 업데이트
         run: |
           NEW_VERSION=${{ steps.version.outputs.new_version }}
@@ -88,6 +117,7 @@ jobs:
           npm version $NEW_VERSION --no-git-tag-version
           cat package.json
 
+      # 9단계: 변경 사항 커밋 및 푸시
       - name: 변경 사항 커밋 및 푸시
         run: |
           git config user.name "github-actions[bot]"
@@ -96,12 +126,14 @@ jobs:
           git commit -m "🔖 chore: bump version to v${{ steps.version.outputs.new_version }}"
           git push origin main
 
+      # 10단계: 새 태그 생성 및 푸시
       - name: 새 태그 생성 및 푸시
         run: |
           NEW_VERSION=${{ steps.version.outputs.new_version }}
           git tag -a v$NEW_VERSION -m "Release v$NEW_VERSION"
           git push origin v$NEW_VERSION
 
+      # 11단계: 릴리스 생성
       - name: 릴리스 생성
         uses: actions/create-release@v1
         env:
@@ -109,6 +141,6 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.new_version }}
           release_name: Release v${{ steps.version.outputs.new_version }}
-          body: 'Release v${{ steps.version.outputs.new_version }}'
+          body: "Release v${{ steps.version.outputs.new_version }}"
           draft: false
           prerelease: false
