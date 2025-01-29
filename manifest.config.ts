@@ -3,7 +3,7 @@ import { ManifestV3Export } from '@crxjs/vite-plugin';
 const manifest = {
   manifest_version: 3,
   name: 'HSU 시간표 마법사',
-  version: '1.2.0',
+  version: '1.2.1',
   description: '한성대학교 종합정보시스템 시간표 및 수업계획서 조회 페이지의 가독성을 높입니다.',
   action: {
     default_popup: 'index.html',
