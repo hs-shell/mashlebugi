@@ -19,13 +19,13 @@ jobs:
       - name: 리포지토리 체크아웃
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # 모든 히스토리와 태그를 가져옴
+          fetch-depth: 0 # 모든 히스토리와 태그를 가져옴
 
       # 2단계: Node.js 설정
       - name: Node.js 설정
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Node.js 18 이상으로 설정
+          node-version: '18' # Node.js 18 이상으로 설정
 
       # 3단계: 의존성 설치
       - name: 의존성 설치
@@ -69,7 +69,6 @@ jobs:
         run: |
           echo "PR 라벨: ${{ steps.get_labels.outputs.result }}"
 
-      # 7단계: 다음 버전 결정
       - name: 다음 버전 결정
         id: version
         run: |
@@ -84,21 +83,30 @@ jobs:
           # 버전 분할
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-          # PR 라벨 가져오기 (JSON 문자열을 배열로 변환)
-          LABELS=$(echo '${{ steps.get_labels.outputs.result }}' | jq -r '.[]')
-          echo "PR 라벨: $LABELS"
+          # PR 라벨 가져오기 (JSON 배열을 Bash 배열로 변환)
+          LABELS_JSON='${{ steps.get_labels.outputs.result }}'
+          LABELS=($(echo $LABELS_JSON | jq -r '.[]'))
+          echo "PR 라벨: ${LABELS[@]}"
 
           # 라벨에 따라 버전 증가 (우선순위: major > minor > patch)
-          if echo "$LABELS" | grep -q "🔖 major"; then
-            NEW_MAJOR=$((MAJOR + 1))
-            NEW_VERSION="$NEW_MAJOR.0.0"
-          elif echo "$LABELS" | grep -q "🔖 minor"; then
-            NEW_MINOR=$((MINOR + 1))
-            NEW_VERSION="$MAJOR.$NEW_MINOR.0"
-          elif echo "$LABELS" | grep -q "🔖 patch"; then
-            NEW_PATCH=$((PATCH + 1))
-            NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
-          else
+          for label in "${LABELS[@]}"; do
+            if [[ "$label" == "🔖 major" ]]; then
+              NEW_MAJOR=$((MAJOR + 1))
+              NEW_VERSION="$NEW_MAJOR.0.0"
+              break
+            elif [[ "$label" == "🔖 minor" ]]; then
+              NEW_MINOR=$((MINOR + 1))
+              NEW_VERSION="$MAJOR.$NEW_MINOR.0"
+              break
+            elif [[ "$label" == "🔖 patch" ]]; then
+              NEW_PATCH=$((PATCH + 1))
+              NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+              break
+            fi
+          done
+
+          # 라벨이 없거나 인식할 수 없는 경우 패치 버전 증가
+          if [[ -z "$NEW_VERSION" ]]; then
             echo "라벨이 지정되지 않았거나 인식할 수 없습니다. 기본적으로 패치 버전을 증가시킵니다."
             NEW_PATCH=$((PATCH + 1))
             NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
@@ -141,6 +149,6 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.new_version }}
           release_name: Release v${{ steps.version.outputs.new_version }}
-          body: "Release v${{ steps.version.outputs.new_version }}"
+          body: 'Release v${{ steps.version.outputs.new_version }}'
           draft: false
           prerelease: false
