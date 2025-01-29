@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Department, Semester, Subject, SugangInwon } from '@/types/types';
+import { Department, SugangInwon } from '@/types/types';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { fetchDepartmentData, fetchSemesterData, fetchSubjectsData, fetchSugangInwonData } from '@/hooks/fetchAPI';
+import { fetchSugangInwonData } from '@/hooks/fetchAPI';
 import { Label } from '@/components/ui/label';
 import { Popover } from '@/components/ui/popover';
 import { PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { Button } from '@/components/ui/button';
 import { loadDataFromStorage } from '@/hooks/storage';
-import { Check, ChevronDown } from 'lucide-react';
 import SugangInwonTable from './SugangInwonTable';
 
+export type ViewType = 'total' | 'master-detail';
 interface DepartmentSearchResult extends Department {
   university: string;
   faculty: string;
@@ -24,7 +24,6 @@ const DepartmentSelector: React.FC<GroupedDataProp> = (groupedDataProp: GroupedD
   const groupedData = groupedDataProp.groupedData;
   const [selectedUniversity, setSelectedUniversity] = useState<string | null>(null);
   const [selectedFaculty, setSelectedFaculty] = useState<string | null>(null);
-  const [subjectsData, setSubjectsData] = useState<Subject[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<DepartmentSearchResult | null>(null);
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -37,7 +36,10 @@ const DepartmentSelector: React.FC<GroupedDataProp> = (groupedDataProp: GroupedD
 
   const [sugangInwon, setSugangInwon] = useState<SugangInwon[]>([]);
 
+  const [view, setView] = useState<ViewType>('master-detail');
+
   useEffect(() => {
+    if (!selectedDepartment) return;
     const fetchAndGroupXML = async () => {
       try {
         /**
@@ -45,7 +47,11 @@ const DepartmentSelector: React.FC<GroupedDataProp> = (groupedDataProp: GroupedD
          *
          *
          */
-        await fetchSugangInwonData({ code: 'L11E', setSugangInwon: setSugangInwon });
+
+        await fetchSugangInwonData({
+          code: selectedDepartment.tcd,
+          setSugangInwon: setSugangInwon,
+        });
         setLoading(false);
       } catch (err) {
         setError((err as Error).message);
@@ -53,7 +59,29 @@ const DepartmentSelector: React.FC<GroupedDataProp> = (groupedDataProp: GroupedD
       }
     };
     fetchAndGroupXML();
-  }, []);
+  }, [selectedDepartment]);
+
+  useEffect(() => {
+    if (isInitialized || !groupedData || Object.keys(groupedData).length === 0) return;
+
+    setIsInitialized(true);
+    loadDataFromStorage('department', (data: string | null) => {
+      if (!data) data = '교양필수';
+      Object.entries(groupedData).forEach(([university, faculties]) => {
+        Object.entries(faculties).forEach(([faculty, departments]) => {
+          departments.forEach((dept) => {
+            if (dept.tnm.toLowerCase().includes(data)) {
+              setSelectedDepartment({ university: university, faculty: faculty, tcd: dept.tcd, tnm: dept.tnm });
+              setSelectedUniversity(university);
+              setSelectedFaculty(faculty);
+              setSelectedTrack(dept.tnm);
+              return;
+            }
+          });
+        });
+      });
+    });
+  }, [groupedData, isInitialized]);
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
@@ -79,27 +107,6 @@ const DepartmentSelector: React.FC<GroupedDataProp> = (groupedDataProp: GroupedD
 
     setSearchResults(results);
   }, [searchTerm, groupedData]);
-
-  useEffect(() => {
-    if (isInitialized || !groupedData || Object.keys(groupedData).length === 0) return;
-
-    setIsInitialized(true);
-    loadDataFromStorage('department', (data: string | null) => {
-      if (!data) return;
-      Object.entries(groupedData).forEach(([university, faculties]) => {
-        Object.entries(faculties).forEach(([faculty, departments]) => {
-          departments.forEach((dept) => {
-            if (dept.tnm.toLowerCase().includes(data)) {
-              setSelectedDepartment({ university: university, faculty: faculty, tcd: dept.tcd, tnm: dept.tnm });
-              setSelectedUniversity(university);
-              setSelectedFaculty(faculty);
-              setSelectedTrack(dept.tnm);
-            }
-          });
-        });
-      });
-    });
-  }, [groupedData, isInitialized]);
 
   // 학과 검색 결과 선택 핸들러
   const handleSearchSelect = (result: DepartmentSearchResult) => {

@@ -146,6 +146,15 @@ export interface SugangInwon {
   juya: string;
 }
 
+export interface SugangColumn {
+  id: keyof SugangInwon;
+  label: string;
+  width: number;
+  minWidth: number;
+  sortable: boolean;
+  filterable: boolean;
+}
+
 export interface SugangMasterColumn {
   id: keyof SugangInwon;
   label: string;
@@ -158,6 +167,8 @@ export interface SugangDetailColumn {
   id: keyof SugangInwon;
   label: string;
   width: number;
+  sortable: boolean;
+  filterable: boolean;
 }
 
 export interface GroupedSugangInwon {
