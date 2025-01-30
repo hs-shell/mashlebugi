@@ -1,12 +1,11 @@
-// components/SearchInput.tsx
 import React from 'react';
 import { Input } from '@/components/ui/input';
 
 interface SearchInputProps {
   searchTerm: string;
   onSearchChange: (term: string) => void;
-  searchResults: any[]; // 타입을 구체적으로 지정하세요.
-  onSelectResult: (result: any) => void; // 타입을 구체적으로 지정하세요.
+  searchResults: any[];
+  onSelectResult: (result: any) => void;
   onClose: () => void;
 }
 

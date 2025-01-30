@@ -1,5 +1,3 @@
-// App.tsx
-
 import { useEffect, useState } from 'react';
 import hsuLogo from '@/assets/hsu.png';
 import { loadDataFromStorage, saveDataToStorage } from '@/hooks/storage';

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -18,9 +18,10 @@ import ListFilterPlus from '@/assets/filter.svg';
 interface DetailTableProps {
   group: GroupedSugangInwon;
   detailColumns: SugangDetailColumn[];
+  onScroll: (bool: boolean) => void;
 }
 
-const SugangInwonDetailTable: React.FC<DetailTableProps> = ({ group, detailColumns }) => {
+const SugangInwonDetailTable: React.FC<DetailTableProps> = ({ group, detailColumns, onScroll }) => {
   // 독립적인 정렬 및 필터링 상태 관리
   const [sortColumn, setSortColumn] = useState<keyof SugangInwon | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -88,6 +89,20 @@ const SugangInwonDetailTable: React.FC<DetailTableProps> = ({ group, detailColum
     return details;
   }, [group.details, filters, sortColumn, sortDirection]);
 
+  useEffect(() => {
+    const isAnyPopoverOpen = Object.values(openPopover).some((isOpen) => isOpen);
+    isAnyPopoverOpen ? onScroll(true) : onScroll(false);
+    if (isAnyPopoverOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [openPopover]);
+
   return (
     <div className="border rounded-lg m-2 mb-4 overflow-hidden">
       <Table className="table-fixed w-full">
@@ -153,7 +168,7 @@ const SugangInwonDetailTable: React.FC<DetailTableProps> = ({ group, detailColum
                         className={`w-[200px] bg-white z-50 p-2 shadow-lg rounded-md`}
                         onInteractOutside={() => setOpenPopover((prev) => ({ ...prev, [col.id]: false }))}
                       >
-                        <div className="dropdown-menu-content">
+                        <div className="dropdown-menu-content -z-10">
                           <Input
                             placeholder="검색..."
                             className="mb-2 w-full"
