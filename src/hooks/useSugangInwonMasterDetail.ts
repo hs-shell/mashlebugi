@@ -1,4 +1,3 @@
-// hooks/useSugangInwonMasterDetail.ts
 import { useState, useMemo } from 'react';
 import type { SugangInwon, GroupedSugangInwon, SortDirection } from '@/types/types';
 
