@@ -42,23 +42,8 @@
     line-height: 1.1;
   }
 
-  /* ============================================= */
-  /*  1) prefers-color-scheme: light 일 때 재정의 */
-  /* ============================================= */
-  @media (prefers-color-scheme: light) {
-    :host {
-      color: #213547;
-      background-color: #ffffff;
-    }
-    :host a:hover {
-      color: #747bff;
-    }
-    :host button {
-      background-color: #f9f9f9;
-    }
-  }
-
   /* ====== Tailwind 변수들을 :host에서 선언 ====== */
+
   :host {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
