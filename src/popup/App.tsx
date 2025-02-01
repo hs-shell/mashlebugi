@@ -4,9 +4,7 @@ import { loadDataFromStorage, saveDataToStorage } from '@/hooks/storage';
 
 function App() {
   const [toggleState, setToggleState] = useState<string>('false');
-
   useEffect(() => {
-    // 초기 토글 상태 불러오기
     loadDataFromStorage('toggleState', (data: string | null) => {
       if (!data) {
         saveDataToStorage('toggleState', 'false');
@@ -21,14 +19,11 @@ function App() {
     setToggleState(newState);
     saveDataToStorage('toggleState', newState);
 
-    // 현재 활성 탭의 콘텐츠 스크립트로 메시지 전송
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0].id) {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'toggle', isToggled: newState === 'true' }, (response) => {
           if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-          } else {
-            console.log('메시지 전송 응답:', response);
+            console.log('해당 페이지는 종합정보시스템이 아닙니다.');
           }
         });
       }
