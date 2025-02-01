@@ -7,12 +7,6 @@ const manifest = {
   description: '한성대학교 종합정보시스템 시간표 및 수업계획서 조회 페이지의 가독성을 높입니다.',
   action: {
     default_popup: 'index.html',
-    icons: {
-      '16': 'images/icon/16.png',
-      '32': 'images/icon/32.png',
-      '48': 'images/icon/48.png',
-      '128': 'images/icon/128.png',
-    },
   },
   icons: {
     '16': 'images/icon/16.png',
@@ -32,7 +26,7 @@ const manifest = {
       matches: ['*://*/*'],
     },
   ],
-  permissions: ['scripting', 'storage'],
+  permissions: ['storage'],
 } as ManifestV3Export;
 
 export default manifest;
