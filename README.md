@@ -8,8 +8,7 @@
 </div>
 <div align="center">
   <img src="https://github.com/user-attachments/assets/cdce3ca7-22e7-4eff-9c72-170d74e0b7af" alt="thumbnail">
-</div>
-<h1></h1><br/><br/>
+</div><br/><br/><br/>
 
 <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
   <h2>
