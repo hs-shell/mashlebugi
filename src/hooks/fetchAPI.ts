@@ -289,7 +289,7 @@ export const fetchCourseEvaluationData = ({
   setCourseEvaluation,
 }: {
   code: string;
-  setCourseEvaluation: (courseEvaluation: CourseEvaluation) => void;
+  setCourseEvaluation: (courseEvaluation: CourseEvaluation[]) => void;
 }) => {
   var xhr = new XMLHttpRequest();
   xhr.open('POST', 'https://info.hansung.ac.kr/jsp_21/student/kyomu/siganpyo_aui_data.jsp', true);
@@ -306,15 +306,17 @@ export const fetchCourseEvaluationData = ({
         const parser = new xml2js.Parser();
         const result: ParsedXML = await parser.parseStringPromise(xml);
 
-        // const item: any = result.root.items[0].item[0];
-        const courseEvaluation: CourseEvaluation = {
-          academicYear: '2001',
-          courseCode: code,
-          courseName: '크롬익스텐션',
-          professor: '홍길동',
-          score: '4.5',
-          semester: '2학기',
-        };
+        const items: any[] = result?.root?.items?.[0]?.item || [];
+
+        const courseEvaluation: CourseEvaluation[] = items.map((item) => ({
+          kyokwacode: item.kyokwacode?.[0] || '',
+          kyokwaname: item.kyokwaname?.[0] || '',
+          kyosu: item.kyosu?.[0] || '',
+          hakgi: item.hakgi?.[0] || '',
+          hakneando: item.hakneando?.[0] || '',
+          jumsu: item.jumsu?.[0] || '',
+        }));
+
         setCourseEvaluation(courseEvaluation);
       } catch (err) {
         console.error('XML parsing failed:', err);

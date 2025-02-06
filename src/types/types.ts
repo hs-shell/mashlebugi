@@ -111,12 +111,12 @@ export interface Description {
 }
 
 export interface CourseEvaluation {
-  courseCode: string;
-  courseName: string;
-  professor: string;
-  academicYear: string;
-  semester: string;
-  score: string;
+  kyokwacode: string;
+  kyokwaname: string;
+  kyosu: string;
+  hakneando: string;
+  hakgi: string;
+  jumsu: string;
 }
 
 /**
