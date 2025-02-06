@@ -47,10 +47,9 @@ const convertPeriodsInString = (input: string): string => {
     목: '목',
     금: '금',
     토: '토',
-    일: '일',
   };
 
-  const periodRegex = /([월화수목금])(\d+)(M?)~(\d+)(M?)/g;
+  const periodRegex = /([월화수목금토일])(\d+)(M?)~(\d+)(M?)/g;
 
   return input.replace(periodRegex, (match, day, startNum, startM, endNum, endM) => {
     const dayFull = days[day] || day;

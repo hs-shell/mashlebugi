@@ -153,7 +153,7 @@ const DepartmentSelector: React.FC<GroupedDataProp> = (groupedDataProp: GroupedD
                 {selectedTrack === null ? '선택해주세요' : selectedTrack}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="absolute w-[800px] bg-zinc-50 p-4 rounded-xl shadow-xl z-50">
+            <PopoverContent className=" bg-zinc-50 p-4 rounded-xl shadow-xl z-50">
               <div className="mb-6 relative">
                 <Input
                   type="text"
