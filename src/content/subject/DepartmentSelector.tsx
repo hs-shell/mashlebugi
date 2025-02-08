@@ -126,6 +126,7 @@ const DepartmentSelector: React.FC = () => {
     if (isInitialized || !groupedData || Object.keys(groupedData).length === 0) return;
 
     setIsInitialized(true);
+    let isDepartmentSelected = false;
     loadDataFromStorage('department', (data: string | null) => {
       if (!data) data = '교양필수';
       Object.entries(groupedData).forEach(([university, faculties]) => {
@@ -136,12 +137,15 @@ const DepartmentSelector: React.FC = () => {
               setSelectedUniversity(university);
               setSelectedFaculty(faculty);
               setSelectedTrack(dept.tnm);
-              return;
+              isDepartmentSelected = true;
             }
           });
         });
       });
     });
+    if (!isDepartmentSelected) {
+      setLoading(false);
+    }
   }, [groupedData, isInitialized]);
 
   // 학과 검색 결과 선택 핸들러
