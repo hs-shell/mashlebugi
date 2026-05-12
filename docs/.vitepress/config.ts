@@ -31,10 +31,12 @@ export default defineConfig({
         nav: [
           { text: '가이드', link: '/guide/basic' },
           { text: '업데이트', link: '/updates/changelog' },
+          { text: '개인정보처리방침', link: '/policy/privacy' },
         ],
         sidebar: {
           '/guide/': guideSidebar('간단 사용 설명서', '고급 사용 설명서', 'FAQ', '공지사항', '가이드'),
           '/updates/': updatesSidebar('업데이트', '업데이트 로그'),
+          '/policy/': [{ text: '정책', items: [{ text: '개인정보 처리방침', link: '/policy/privacy' }] }],
         },
         outline: { label: '목차' },
         docFooter: { prev: '이전', next: '다음' },
