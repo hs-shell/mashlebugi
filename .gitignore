@@ -7,6 +7,10 @@ dist/
 # Vite 캐시 (만약 사용 중이라면)
 .vite/
 
+# VitePress 빌드 산출물
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
 # TypeScript 빌드 정보 (예: tsconfig의 tsBuildInfoFile)
 **/*.tsbuildinfo
 
